@@ -1010,27 +1010,9 @@ private:
                 return nullptr;
             }
 
-            // initializeForRendering() should be called before
-            // registerCallback(), as the previous creates a new view in
-            // Impress.
-            _loKitDocument->pClass->initializeForRendering(_loKitDocument, (renderOpts.empty() ? nullptr : renderOpts.c_str()));
-
-            if (_multiView)
-            {
-                Log::info("Loading view to document from URI: [" + uri + "] for session [" + sessionId + "].");
-                const auto viewId = _loKitDocument->pClass->createView(_loKitDocument);
-
-                _loKitDocument->pClass->registerCallback(_loKitDocument, ViewCallback, reinterpret_cast<void*>(intSessionId));
-
-                Log::info() << "Document [" << _url << "] view ["
-                            << viewId << "] loaded, leaving "
-                            << (_clientViews + 1) << " views." << Log::end;
-            }
-            else
-            {
-                _loKitDocument->pClass->registerCallback(_loKitDocument, DocumentCallback, this);
-            }
-
+            // Only save the options on opening the document.
+            // No support for changing them after opening a document.
+            _renderOpts = renderOpts;
         }
         else
         {
@@ -1055,6 +1037,22 @@ private:
             }
         }
 
+        if (_multiView)
+        {
+            Log::info("Loading view to document from URI: [" + uri + "] for session [" + sessionId + "].");
+            const auto viewId = _loKitDocument->pClass->createView(_loKitDocument);
+
+            Log::info() << "Document [" << _url << "] view ["
+                        << viewId << "] loaded, leaving "
+                        << (_clientViews + 1) << " views." << Log::end;
+        }
+
+        // initializeForRendering() should be called before
+        // registerCallback(), as the previous creates a new view in Impress.
+        _loKitDocument->pClass->initializeForRendering(_loKitDocument, _renderOpts.c_str());
+
+        _loKitDocument->pClass->registerCallback(_loKitDocument, DocumentCallback, this);
+
         return _loKitDocument;
     }
 
@@ -1066,6 +1064,7 @@ private:
     const std::string _docKey;
     const std::string _url;
     std::string _jailedUrl;
+    std::string _renderOpts;
 
     LibreOfficeKitDocument *_loKitDocument;
 
