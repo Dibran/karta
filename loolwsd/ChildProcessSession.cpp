@@ -290,15 +290,13 @@ ChildProcessSession::ChildProcessSession(const std::string& id,
                                          std::shared_ptr<WebSocket> ws,
                                          LibreOfficeKitDocument * loKitDocument,
                                          const std::string& jailId,
-                                         OnLoadCallback onLoad,
-                                         OnUnloadCallback onUnload) :
+                                         IDocumentManager& docManager) :
     LOOLSession(id, Kind::ToMaster, ws),
     _loKitDocument(loKitDocument),
     _multiView(std::getenv("LOK_VIEW_CALLBACK")),
     _jailId(jailId),
     _viewId(0),
-    _onLoad(onLoad),
-    _onUnload(onUnload),
+    _docManager(docManager),
     _callbackWorker(new CallbackWorker(_callbackQueue, *this))
 {
     Log::info("ChildProcessSession ctor [" + getName() + "].");
@@ -326,7 +324,7 @@ void ChildProcessSession::disconnect()
         if (_multiView)
             _loKitDocument->pClass->setView(_loKitDocument, _viewId);
 
-        _onUnload(getId());
+        _docManager.onUnload(getId());
 
         LOOLSession::disconnect();
     }
@@ -596,7 +594,7 @@ bool ChildProcessSession::loadDocument(const char * /*buffer*/, int /*length*/, 
 
     std::unique_lock<std::recursive_mutex> lock(Mutex);
 
-    _loKitDocument = _onLoad(getId(), _jailedFilePath, _docPassword, renderOpts, _haveDocPassword);
+    _loKitDocument = _docManager.onLoad(getId(), _jailedFilePath, _docPassword, renderOpts, _haveDocPassword);
     if (!_loKitDocument)
     {
         Log::error("Failed to get LoKitDocument instance.");
