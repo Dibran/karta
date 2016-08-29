@@ -26,12 +26,15 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <sstream>
 
 #define LOK_USE_UNSTABLE_API
 #include <LibreOfficeKit/LibreOfficeKitInit.h>
 #include <LibreOfficeKit/LibreOfficeKitEnums.h>
 
 #include <Poco/Exception.h>
+#include <Poco/JSON/Object.h>
+#include <Poco/JSON/Parser.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
@@ -63,6 +66,9 @@ using namespace LOOLProtocol;
 
 using Poco::Exception;
 using Poco::File;
+using Poco::JSON::Object;
+using Poco::JSON::Parser;
+
 using Poco::Net::NetException;
 using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPResponse;
@@ -875,6 +881,7 @@ private:
     /// Load a document (or view) and register callbacks.
     LibreOfficeKitDocument* onLoad(const std::string& sessionId,
                                    const std::string& uri,
+                                   const std::string& userName,
                                    const std::string& docPassword,
                                    const std::string& renderOpts,
                                    const bool haveDocPassword) override
@@ -893,7 +900,11 @@ private:
 
         try
         {
-            load(sessionId, uri, docPassword, renderOpts, haveDocPassword);
+            load(sessionId, uri, userName, docPassword, renderOpts, haveDocPassword);
+            if (!_loKitDocument)
+            {
+                return nullptr;
+            }
         }
         catch (const std::exception& exc)
         {
@@ -945,6 +956,7 @@ private:
 
     LibreOfficeKitDocument* load(const std::string& sessionId,
                                  const std::string& uri,
+                                 const std::string& userName,
                                  const std::string& docPassword,
                                  const std::string& renderOpts,
                                  const bool haveDocPassword)
@@ -1036,6 +1048,33 @@ private:
                 }
             }
         }
+
+        Object::Ptr renderOptsObj = new Object();
+
+        // Fill the object with renderoptions, if any
+        if (!_renderOpts.empty()) {
+            Parser parser;
+            Poco::Dynamic::Var var = parser.parse(_renderOpts);
+            renderOptsObj = var.extract<Object::Ptr>();
+        }
+
+        // Append name of the user, if any, who opened the document to rendering options
+        if (!userName.empty())
+        {
+            Object::Ptr authorContainer = new Object();
+            Object::Ptr authorObj = new Object();
+            authorObj->set("type", "string");
+            authorObj->set("value", userName);
+
+            renderOptsObj->set(".uno:Author", authorObj);
+        }
+
+        std::ostringstream ossRenderOpts;
+        renderOptsObj->stringify(ossRenderOpts);
+
+        // initializeForRendering() should be called before
+        // registerCallback(), as the previous creates a new view in Impress.
+        _loKitDocument->pClass->initializeForRendering(_loKitDocument, ossRenderOpts.str().c_str());
 
         if (_multiView)
         {

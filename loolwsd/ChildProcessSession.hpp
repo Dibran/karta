@@ -32,10 +32,10 @@ public:
     virtual
     LibreOfficeKitDocument* onLoad(const std::string& sessionId,
                                    const std::string& jailedFilePath,
+                                   const std::string& userName,
                                    const std::string& docPassword,
                                    const std::string& renderOpts,
                                    const bool haveDocPassword) = 0;
-
     /// Unload a client session, which unloads the document
     /// if it is the last and only.
     virtual
