@@ -10,6 +10,17 @@ function onDelete(e) {
 	}
 }
 
+function onChangeUserList() {
+	var usernames = [];
+	for (var viewid in map._viewInfo) {
+		usernames.push(map._viewInfo[viewid]);
+	}
+
+	$('#userlist').w2field('list', {
+		items: usernames
+	});
+}
+
 function resizeToolbar() {
 	var hasMoreItems = false;
 	var toolbarUp = w2ui['toolbar-up'];
@@ -449,6 +460,8 @@ $(function () {
 			{type: 'break'},
 			{type: 'button',  id: 'takeedit', img: 'edit', hint: _('Take edit lock (others can only view)'), caption: _('VIEWING')},
 			{type: 'break'},
+			{type: 'html', id: 'userlistcontainer', html: '<div><label>Users: </label><input id="userlist" type="list" /></div>'},
+			{type: 'break'},
 			{type: 'button',  id: 'prev', img: 'prev', hint: _('Previous page')},
 			{type: 'button',  id: 'next', img: 'next', hint: _('Next page')},
 			{type: 'break', id: 'prevnextbreak'},
@@ -475,7 +488,6 @@ var formatButtons = {
 
 var takeEditPopupMessage = '<div>' + _('You are viewing now.') + '<br/>' + _('Click here to take edit.') + '</div>';
 var takeEditPopupTimeout = null;
-
 
 function toggleButton(toolbar, state, command)
 {
@@ -1325,6 +1337,15 @@ map.on('statusindicator', function (e) {
 			$('.styles-select').on('select2:select', onStyleSelect);
 		}
 	}
+});
+
+// TODO: Dynamically add/remove users from list
+map.on('addview', function(e) {
+	onChangeUserList();
+});
+
+map.on('removeview', function(e) {
+	onChangeUserList();
 });
 
 $(window).resize(function() {
