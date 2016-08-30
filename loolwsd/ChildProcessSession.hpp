@@ -40,6 +40,14 @@ public:
     /// if it is the last and only.
     virtual
     void onUnload(const std::string& sessionId) = 0;
+
+    /// Send message to all other sessions except 'sessionId'
+    virtual
+    void notifyOtherSessions(const std::string& sessionId, const std::string& message) const = 0;
+
+    /// Send other view's information to current view (one with sessionId)
+    virtual
+    void notifyCurrentViewOfOtherViews(const std::string& sessionId) const = 0;
 };
 
 class ChildProcessSession final : public LOOLSession
@@ -68,6 +76,7 @@ public:
     virtual void disconnect() override;
 
     int getViewId() const { return _viewId; }
+    const std::string getViewUserName() const { return _userName; }
 
     const std::string& getDocType() const { return _docType; }
 
