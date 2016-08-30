@@ -29,6 +29,7 @@
 #include <Poco/Path.h>
 #include <Poco/String.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/URI.h>
 
 #include "Common.hpp"
 #include "LOOLProtocol.hpp"
@@ -156,7 +157,8 @@ void LOOLSession::parseDocOptions(const StringTokenizer& tokens, int& part, std:
         }
         else if (tokens[i].find("author=") == 0)
         {
-            _userName = tokens[i].substr(strlen("author="));
+            std::string userName = tokens[i].substr(strlen("author="));
+            Poco::URI::decode(userName, _userName);
             ++offset;
         }
         else if (tokens[i].find("timestamp=") == 0)
