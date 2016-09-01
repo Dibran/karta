@@ -1344,7 +1344,7 @@ function updateUserListCount(userlist) {
 	if (count > 1) {
 		userlist.caption = nUsers.replace('%n', count);
 	} else if (count === 1) {
-		userlist.caption = '1 user';
+		userlist.caption = _('1 user');
 	}
 }
 
