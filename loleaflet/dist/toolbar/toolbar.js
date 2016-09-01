@@ -450,7 +450,7 @@ $(function () {
 			{type: 'break'},
 			{type: 'button',  id: 'takeedit', img: 'edit', hint: _('Take edit lock (others can only view)'), caption: _('VIEWING')},
 			{type: 'break'},
-			{type: 'menu', id: 'userlist', caption: _('Users'), items: [
+			{type: 'menu', id: 'userlist', caption: _('1 user'), items: [
 				{ id: '-1', text: _('You'), disabled: true },
 			]},
 			{type: 'break'},
@@ -1338,7 +1338,20 @@ function getUserListItem(viewId, userName) {
 	var userListItem = { id: viewId, text: userName, disabled: true };
 	return userListItem;
 }
+var nUsers = _('%n users');
+function updateUserListCount(userlist) {
+	var count = userlist.items.length;
+	if (count > 1) {
+		userlist.caption = nUsers.replace('%n', count);
+	} else if (count === 1) {
+		userlist.caption = '1 user';
+	}
+}
+
 map.on('addview', function(e) {
+	if (!e.viewId || !e.username)
+		return;
+
 	$('#tb_toolbar-down_item_userlist')
 		.w2overlay({
 			class: 'loleaflet-font',
@@ -1355,10 +1368,14 @@ map.on('addview', function(e) {
 	var userlist = w2ui['toolbar-down'].get('userlist');
 	userlist.items.push(getUserListItem(e.viewId, e.username));
 
+	updateUserListCount(userlist);
 	w2ui['toolbar-down'].refresh();
 });
 
 map.on('removeview', function(e) {
+	if (!e.viewId || !e.username)
+		return;
+
 	$('#tb_toolbar-down_item_userlist')
 		.w2overlay({
 			class: 'loleaflet-font',
@@ -1376,9 +1393,11 @@ map.on('removeview', function(e) {
 	for (var idx in userlist.items) {
 		if (userlist.items[idx].id == e.viewId) {
 			userlist.items.splice(idx, 1);
+			break;
 		}
 	}
 
+	updateUserListCount(userlist);
 	w2ui['toolbar-down'].refresh();
 });
 
