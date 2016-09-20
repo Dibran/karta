@@ -347,6 +347,9 @@ L.TileLayer = L.GridLayer.extend({
 		else if (textMsg.startsWith('contextmenu:')) {
 			this._onContextMenuMsg(textMsg);
 		}
+		else if (textMsg.startsWith('viewinfo:')) {
+			this._onViewInfoMsg(textMsg);
+		}
 	},
 
 	_onCommandValuesMsg: function (textMsg) {
@@ -508,6 +511,64 @@ L.TileLayer = L.GridLayer.extend({
 		this._visibleCursorOnLostFocus = this._visibleCursor;
 		this._isCursorOverlayVisible = true;
 		this._onUpdateCursor();
+	},
+
+	_addView: function(viewId, username) {
+		// Ignore if viewid is same as ours
+		if (viewId === this._viewId) {
+			return;
+		}
+
+		this._map.addView(viewId, username);
+
+		//TODO: We can initialize color and other properties here.
+		if (typeof this._viewCursors[viewId] !== 'undefined') {
+			this._viewCursors[viewId] = {};
+		}
+
+		this._onUpdateViewCursor(viewId);
+	},
+
+	_removeView: function(viewId) {
+		// Couldn't be ours, now could it?!
+		if (viewId === this._viewId) {
+			return;
+		}
+
+		// Remove selection, if any.
+		if (this._viewSelections[viewId] && this._viewSelections[viewId].selection) {
+			this._viewSelectionsGroup.removeLayer(this._viewSelections[viewId].selection);
+		}
+
+		// Remove the view and update (to refresh as needed).
+		if (typeof this._viewCursors[viewId] !== 'undefined') {
+			this._viewCursors[viewId].visible = false;
+			this._onUpdateViewCursor(viewId);
+			delete this._viewCursors[viewId];
+		}
+
+		this._map.removeView(viewId);
+	},
+
+	_onViewInfoMsg: function(textMsg) {
+		textMsg = textMsg.substring('viewinfo: '.length);
+		var viewInfo = JSON.parse(textMsg);
+
+		// A new view
+		var viewIds = [];
+		for (var viewInfoIdx in viewInfo) {
+			if (!(parseInt(viewInfo[viewInfoIdx].id) in this._map._viewInfo)) {
+				this._addView(viewInfo[viewInfoIdx].id, viewInfo[viewInfoIdx].username);
+			}
+			viewIds.push(viewInfo[viewInfoIdx].id);
+		}
+
+		// Check if any view is deleted
+		for (viewInfoIdx in this._map._viewInfo) {
+			if (viewIds.indexOf(parseInt(viewInfoIdx)) === -1) {
+				this._removeView(parseInt(viewInfoIdx));
+			}
+		}
 	},
 
 	_onPartPageRectanglesMsg: function (textMsg) {
