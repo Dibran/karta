@@ -40,6 +40,10 @@ public:
     /// if it is the last and only.
     virtual
     void onUnload(const std::string& sessionId) = 0;
+
+    /// Send updated view info to all active sessions
+    virtual
+    void notifyViewInfo() = 0;
 };
 
 class ChildProcessSession final : public LOOLSession
