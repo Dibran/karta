@@ -514,20 +514,10 @@ L.TileLayer = L.GridLayer.extend({
 	},
 
 	_addView: function(viewId, username) {
-		// Ignore if viewid is same as ours
-		if (viewId === this._viewId) {
-			return;
-		}
-
 		this._map.addView(viewId, username);
 	},
 
 	_removeView: function(viewId) {
-		// Couldn't be ours, now could it?!
-		if (viewId === this._viewId) {
-			return;
-		}
-
 		this._map.removeView(viewId);
 	},
 
