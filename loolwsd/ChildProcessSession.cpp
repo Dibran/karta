@@ -349,7 +349,7 @@ bool ChildProcessSession::_handleInput(const char *buffer, int length)
 
         // Refresh the viewIds.
         sendTextFrame("remallviews:");
-        _docManager.notifyCurrentViewOfOtherViews(getId());
+        //_docManager.notifyCurrentViewOfOtherViews(getId());
 
         const int curPart = _loKitDocument->pClass->getPart(_loKitDocument);
         sendTextFrame("curpart: part=" + std::to_string(curPart));
@@ -610,7 +610,6 @@ bool ChildProcessSession::loadDocument(const char * /*buffer*/, int /*length*/, 
     {
         std::ostringstream ossViewInfo;
         _viewId = _loKitDocument->pClass->getView(_loKitDocument);
-        _viewId = _loKitDocument->getView();
         const auto viewId = std::to_string(_viewId);
 
         // Create a message object
@@ -620,7 +619,7 @@ bool ChildProcessSession::loadDocument(const char * /*buffer*/, int /*length*/, 
         viewInfoObj->stringify(ossViewInfo);
 
         Log::info("Created new view with viewid: [" + viewId + "] for username: [" + _userName + "].");
-        _docManager.notifyOtherSessions(getId(), "addview: " + ossViewInfo.str());
+        //_docManager.notifyOtherSessions(getId(), "addview: " + ossViewInfo.str());
     }
 
     _docType = LOKitHelper::getDocumentTypeAsString(_loKitDocument);
@@ -635,7 +634,7 @@ bool ChildProcessSession::loadDocument(const char * /*buffer*/, int /*length*/, 
         return false;
 
     // Inform this view of other views
-    _docManager.notifyCurrentViewOfOtherViews(getId());
+    //_docManager.notifyCurrentViewOfOtherViews(getId());
 
     Log::info("Loaded session " + getId());
     return true;
