@@ -520,31 +520,12 @@ L.TileLayer = L.GridLayer.extend({
 		}
 
 		this._map.addView(viewId, username);
-
-		//TODO: We can initialize color and other properties here.
-		if (typeof this._viewCursors[viewId] !== 'undefined') {
-			this._viewCursors[viewId] = {};
-		}
-
-		this._onUpdateViewCursor(viewId);
 	},
 
 	_removeView: function(viewId) {
 		// Couldn't be ours, now could it?!
 		if (viewId === this._viewId) {
 			return;
-		}
-
-		// Remove selection, if any.
-		if (this._viewSelections[viewId] && this._viewSelections[viewId].selection) {
-			this._viewSelectionsGroup.removeLayer(this._viewSelections[viewId].selection);
-		}
-
-		// Remove the view and update (to refresh as needed).
-		if (typeof this._viewCursors[viewId] !== 'undefined') {
-			this._viewCursors[viewId].visible = false;
-			this._onUpdateViewCursor(viewId);
-			delete this._viewCursors[viewId];
 		}
 
 		this._map.removeView(viewId);
