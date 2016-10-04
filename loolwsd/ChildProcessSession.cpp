@@ -618,15 +618,6 @@ bool ChildProcessSession::loadDocument(const char * /*buffer*/, int /*length*/, 
     if (!getStatus(nullptr, 0))
         return false;
 
-    // Inform this view of other views
-    for (const auto viewId: _docManager.getViewIds())
-    {
-        if (viewId != _viewId)
-        {
-            sendTextFrame("addview: " + std::to_string(viewId));
-        }
-    }
-
     Log::info("Loaded session " + getId());
     return true;
 }
