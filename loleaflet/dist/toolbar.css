@@ -313,10 +313,3 @@ tr.useritem:hover {
 tr.useritem > td {
     padding: 7px;
 }
-
-tr.useritem > td.usercolor {
-    display: inline-block;
-    top: 5px;
-    left: 3px;
-    position: relative;
-}

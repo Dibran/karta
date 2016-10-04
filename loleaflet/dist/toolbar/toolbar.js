@@ -1335,9 +1335,8 @@ map.on('statusindicator', function (e) {
 	}
 });
 
-function getUserItem(viewId, userName, color) {
+function getUserItem(viewId, userName) {
 	var html = '<tr class="useritem" id="user-' + viewId + '">' +
-	             '<td class=usercolor style="background-color: ' + color  +';"></td>' +
 	             '<td class="username">' + userName + '</td>' +
 	           '</tr>';
 	return html;
@@ -1375,13 +1374,11 @@ map.on('addview', function(e) {
 	}, 3000);
 
 	var username = e.username;
-	var color = L.LOUtil.getViewIdHexColor(e.viewId);
 	if (e.viewId === map._docLayer._viewId) {
 		username = _('You');
-		color = '#000';
 	}
 	var userlistItem = w2ui['toolbar-down'].get('userlist');
-	var newhtml = $(userlistItem.html).find('#userlist_table tbody').append(getUserItem(e.viewId, username, color)).parent().parent()[0].outerHTML;
+	var newhtml = $(userlistItem.html).find('#userlist_table tbody').append(getUserItem(e.viewId, username)).parent().parent()[0].outerHTML;
 	userlistItem.html = newhtml;
 	updateUserListCount();
 });
