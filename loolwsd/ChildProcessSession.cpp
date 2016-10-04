@@ -326,6 +326,7 @@ void ChildProcessSession::disconnect()
             _loKitDocument->pClass->setView(_loKitDocument, _viewId);
 
         _docManager.onUnload(getId());
+        _docManager.notifyViewInfo();
 
         LOOLSession::disconnect();
     }
@@ -687,7 +688,7 @@ bool ChildProcessSession::getStatus(const char* /*buffer*/, int /*length*/)
     if (_multiView)
         _loKitDocument->pClass->setView(_loKitDocument, _viewId);
 
-    const auto status = LOKitHelper::documentStatus(_loKitDocument);
+    const auto status = LOKitHelper::documentStatus(_loKitDocument, Util::decodeId(getId()));
     if (status.empty())
     {
         Log::error("Failed to get document status.");

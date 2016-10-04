@@ -952,55 +952,28 @@ private:
             _loKitDocument->pClass->registerCallback(_loKitDocument, nullptr, nullptr);
             _loKitDocument->pClass->destroyView(_loKitDocument, viewId);
         }
-
-        // Broadcast updated view info
-        notifyViewInfo();
     }
 
     /// Notify all views of viewId and their associated usernames
     void notifyViewInfo() override
     {
-        /*     std::unique_lock<std::mutex> lockLokDoc(_loKitDocument->getLock());
-
-        // Get the list of view ids from the core
-        int viewCount = _loKitDocument->getViewsCount();
-        std::vector<int> viewIds(viewCount);
-        _loKitDocument->getViewIds(viewIds.data(), viewCount);
-        lockLokDoc.unlock();
-
         std::unique_lock<std::mutex> lock(_mutex);
+
         // Store the list of viewid, username mapping in a map
-        std::map<int, std::string> viewInfoMap;
+        Array::Ptr viewInfoArray = new Array();
+        int arrayIndex = 0;
         for (auto& connectionIt : _connections)
         {
+            Object::Ptr viewInfoObj = new Object();
+
             if (connectionIt.second->isRunning())
             {
                 const auto session = connectionIt.second->getSession();
-                const auto viewId = session->getViewId();
-                viewInfoMap[viewId] = session->getViewUserName();
-            }
-        }
+                viewInfoObj->set("id", Util::decodeId(session->getId()));
+                viewInfoObj->set("username", session->getViewUserName());
 
-        // Double check if list of viewids from core and our list matches,
-        // and create an array of JSON objects containing id and username
-        Array::Ptr viewInfoArray = new Array();
-        int arrayIndex = 0;
-        for (auto& viewId: viewIds)
-        {
-            Object::Ptr viewInfoObj = new Object();
-            viewInfoObj->set("id", viewId);
-
-            if (viewInfoMap.find(viewId) == viewInfoMap.end())
-            {
-                Log::error("No username found for viewId [" + std::to_string(viewId) + "].");
-                viewInfoObj->set("username", "Unknown");
+                viewInfoArray->set(arrayIndex++, viewInfoObj);
             }
-            else
-            {
-                viewInfoObj->set("username", viewInfoMap[viewId]);
-            }
-
-            viewInfoArray->set(arrayIndex++, viewInfoObj);
         }
 
         std::ostringstream ossViewInfo;
@@ -1018,7 +991,6 @@ private:
                 }
             }
         }
-        */
     }
 
 private:
